@@ -9,6 +9,8 @@ extern double profit = 500;
 extern double lots = 2.00;
 extern int amountPartialTarget = 2;
 
+int totalPositions = 0;
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -16,6 +18,7 @@ int OnInit()
   {
 //---
    Print( "Position Manager V0.1.0");
+
 //---
    return(INIT_SUCCEEDED);
   }
@@ -101,11 +104,11 @@ void positionManager()
 							//	close partial target
 							if( OrderLots() > (lots/2)) {
 								OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() - 30*Point, OrderTakeProfit(), 0, Green );
-								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_BID), 0, DarkGreen );
+								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_ASK), 0, DarkGreen );
 							} 
 
 							if( OrderLots()  == (lots/2)) {
-								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_BID), 0, DarkGreen );
+								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_ASK), 0, DarkGreen );
 							}
 
 							historyManager( OrderTicket() );
@@ -129,10 +132,65 @@ void positionManager()
 void orderManager()
 {
 
+	//	if long script is executed
+	//	open order with default settings
+	if( GlobalVariableCheck( "long" ) ) {
+		OrderSend( Symbol(), OP_BUY, lots, MarketInfo( Symbol(), MODE_ASK), 3, 0, 0);
+		GlobalVariableDel( "long" );
+	}
+	//	--
+
+	//	if short script is executed
+	//	open order with default settings
+	if( GlobalVariableCheck( "short" ) ) {
+		OrderSend( Symbol(), OP_SELL, lots, MarketInfo( Symbol(), MODE_BID), 3, 0, 0);
+		GlobalVariableDel( "short" );
+	}
+	//	--
+
+	//	Prevent overhead
+	if( totalPositions == OrdersTotal() ) {
+		return;
+	}
+	Print("new order");
+
+	//	set new totalPositions
+	totalPositions = OrdersTotal();
+
+
 	double newOrderStopLoss;
 	double newOrderTakeProfit;
 	double partialTarget;
+
+	//	Select last new order
+	if( OrderSelect( OrdersTotal()-1, SELECT_BY_POS, MODE_TRADES) == true && OrderSymbol() ) {
+
+		//	if no stop loss
+		//	set default settings for new order
+		if( OrderStopLoss() == 0 ) {
+
+			//	check if long/short position
+			switch( OrderType() ) {
+				//	buy
+				case 0:
+				newOrderStopLoss = OrderOpenPrice() - (maxRisk * Point);
+				newOrderTakeProfit = OrderOpenPrice() + ( profit * Point);
+				OrderModify( OrderTicket(), OrderOpenPrice(), newOrderStopLoss, newOrderTakeProfit, 0, Green );
+				break;
+				//	sell
+				case 1:
+				newOrderStopLoss = OrderOpenPrice() + (maxRisk * Point);
+				newOrderTakeProfit = OrderOpenPrice() - ( profit * Point);
+				OrderModify( OrderTicket(), OrderOpenPrice(), newOrderStopLoss, newOrderTakeProfit, 0, Green );
+				break;
+
+			}
+
+		}
+
+	}
 	
+	/*
 	if(OrdersTotal() > 0) {
 
 		//	itterate over each order
@@ -159,6 +217,9 @@ void orderManager()
 						OrderModify( OrderTicket(), OrderOpenPrice(), newOrderStopLoss, newOrderTakeProfit, 0, Green );
 						break;
 					}
+
+					//	init new position and add to list
+
 
 					// set partial targets
 					if( amountPartialTarget > 0 ) {
@@ -191,6 +252,7 @@ void orderManager()
 					//	--
 
 				}
+				// --
 
 			}
 		}
@@ -199,6 +261,7 @@ void orderManager()
 		positionManager();
 
 	}
+	*/
 
 };
 //	--
