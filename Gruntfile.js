@@ -7,14 +7,16 @@ module.exports = function(grunt) {
 		copy: {
 			main: {
 				files:[
-					{src: 'position-manager.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Experts/position manager/position-manager.mq4'}
+					{src: 'position-manager.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Experts/position manager/position-manager.mq4'},
+					{src: 'scripts/long.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Scripts/position manager/long.mq4'},
+					{src: 'scripts/short.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Scripts/position manager/short.mq4'}
 				]
 			}
 		},
 
 		watch: {
 			scripts: {
-				files: ['position-manager.mq4'],
+				files: ['position-manager.mq4', 'scripts/*.mq4'],
 				tasks: ['copy'],
 				options: {
 					debounceDelay: 250,
