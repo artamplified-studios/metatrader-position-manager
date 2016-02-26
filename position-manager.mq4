@@ -4,12 +4,12 @@
 //|                                      http://www.artamplified.com |
 //+------------------------------------------------------------------+
 
-extern int maxRisk = 150;
-extern double profit = 500;
-extern double lots = 2.00;
-extern int amountPartialTarget = 2;
+extern int maxRisk 					= 150;
+extern double profit 				= 500;
+extern double lots 					= 2.00;
+extern int amountPartialTarget 		= 2;
 
-int totalPositions = 0;
+int totalPositions 					= 0;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -36,9 +36,12 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //---
+	
+	//	Legendary sannin
 	orderManager();
 	positionManager();
-   
+   	officeManager();
+
   }
 //+------------------------------------------------------------------+
 
@@ -239,6 +242,7 @@ void historyManager( int _orderTicket ) {
 	double historyOrderOpenPrice;
 	datetime historyOrderOpenTime;
 	double historyPartialTarget;
+	//	--
 
 
 	for( int i=0; i<amountPartialTarget; i++ ) {
@@ -247,7 +251,7 @@ void historyManager( int _orderTicket ) {
 		historyPartialTarget = ObjectGet( objectName, 1 );
 
 		//	find partial target
-		if( ObjectFind( 0, objectName == 0 )	) {
+		if( ObjectFind( 0, objectName ) == 0 ) {
 			ObjectDelete( objectName );
 			//	select order ticket
 			//	find OrderOpenPrice and OrderOpenTime
@@ -273,13 +277,82 @@ void historyManager( int _orderTicket ) {
 					}
 				}
 			}
+			//	--
+
 		}
 	}
 
 };
+//	--
 
 
+//	Office manager
+//	Keeps base of operation clean
+//	cleans chart of partial targets objects
+int totalHistoryOrders = 0;
 
+void officeManager() {
+
+	//	prevent overhead
+	if( totalHistoryOrders == OrdersHistoryTotal() ) {
+		return;
+	}
+
+	string objectName;	//	store partial target level object
+
+	//	update totalHistoryOrders
+	totalHistoryOrders = OrdersHistoryTotal();
+
+	//	iterate over history list
+	//	find order which has been stopped out || find order which profit target has been hit
+	for( int i=0; i<OrdersHistoryTotal(); i++ ) {
+		if( OrderSelect( i, SELECT_BY_POS, MODE_HISTORY ) ) {
+
+			for( int j=0; j<amountPartialTarget; j++) {
+
+				objectName = (string)OrderTicket() + " target "+(string)j;
+
+				switch( OrderType() ) {
+					//	buy
+					case 0:
+						
+						if( ObjectFind(0, objectName ) == 0 ) {
+							//	if stopped out, clean chart of partial targets level
+							if( OrderClosePrice() <= OrderStopLoss() && OrderClosePrice() >! OrderOpenPrice() ) {
+								ObjectDelete( objectName );
+							}
+
+							//	if profit target hit, clean chart of partial targets level
+							if( OrderClosePrice() >= OrderTakeProfit() ) {
+								ObjectDelete( objectName );
+							}
+						}
+
+					break;
+					//	sell
+					case 1:
+
+						if( ObjectFind(0, objectName ) == 0 ) {
+							//	if stopped out, clean chart of partial targets level
+							if( OrderClosePrice() >= OrderStopLoss() && OrderClosePrice() <! OrderOpenPrice() ) {
+								ObjectDelete( objectName );
+							}
+
+							//	if profit target hit, clean chart of partial targets level
+							if( OrderClosePrice() <= OrderTakeProfit() ) {
+								ObjectDelete( objectName );
+							}
+						}
+
+					break;
+				}
+			}
+
+		}
+
+	}
+
+}
 
 
 
