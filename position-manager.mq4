@@ -84,7 +84,9 @@ void positionManager()
 							if( OrderLots() > (lots/2) ) {
 								OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() + 30*Point, OrderTakeProfit(), 0, Green );
 								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_BID), 0, DarkGreen );
-								
+								//	Send notification
+								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " target 0 hit!" );
+
 								historyManager( OrderTicket() );
 							}
 
@@ -93,7 +95,9 @@ void positionManager()
 								//	maybe trail stop
 								//	OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() + 30*Point, OrderTakeProfit(), 0, Green );
 								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_BID), 0, DarkGreen );
-								
+								//	Send notification
+								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " target 1 hit!" );
+
 								historyManager( OrderTicket() );
 							}
 						}
@@ -319,11 +323,17 @@ void officeManager() {
 						if( ObjectFind(0, objectName ) == 0 ) {
 							//	if stopped out, clean chart of partial targets level
 							if( OrderClosePrice() <= OrderStopLoss() && OrderClosePrice() >! OrderOpenPrice() ) {
+								//	Send notification
+								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " Stopped out! Stay focused, stay disciplined, try again, believe" );
+
 								ObjectDelete( objectName );
 							}
 
 							//	if profit target hit, clean chart of partial targets level
 							if( OrderClosePrice() >= OrderTakeProfit() ) {
+								//	Send notification
+								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " Profit target hit! Mission accomplished" );
+
 								ObjectDelete( objectName );
 							}
 						}
@@ -340,6 +350,9 @@ void officeManager() {
 
 							//	if profit target hit, clean chart of partial targets level
 							if( OrderClosePrice() <= OrderTakeProfit() ) {
+								//	Send notification
+								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " Profit target hit! Mission accomplished" );
+
 								ObjectDelete( objectName );
 							}
 						}
