@@ -90,7 +90,7 @@ void positionManager()
 								historyManager( OrderTicket() );
 							}
 
-							if( OrderLots() >= (lots/2) ) {
+							if( pt==1 && OrderLots() == (lots/2) ) {
 								//	todo feature request
 								//	maybe trail stop
 								//	OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() + 30*Point, OrderTakeProfit(), 0, Green );
@@ -100,6 +100,7 @@ void positionManager()
 
 								historyManager( OrderTicket() );
 							}
+							
 						}
 
 					break;
@@ -114,15 +115,17 @@ void positionManager()
 								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_ASK), 0, DarkGreen );
 								
 								historyManager( OrderTicket() );
+								return;
 							}
 
-							if( OrderLots() >= (lots/2) ) {
+							if( pt==1 && OrderLots() == (lots/2) ) {
 								//	todo feature request
 								//	maybe trail stop
 								//	OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() - 30*Point, OrderTakeProfit(), 0, Green );
 								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_ASK), 0, DarkGreen );
 								
 								historyManager( OrderTicket() );
+								return;
 							}
 						}
 
