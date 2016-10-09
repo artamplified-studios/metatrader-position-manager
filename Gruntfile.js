@@ -1,15 +1,15 @@
 module.exports = function(grunt) {
 
-	var dist = '/Applications/XM.app/Contents/Resources/drive_c/Program Files/XM MT4/MQL4/Experts/position-manager';
+	var dist = '/Applications/XM.app/Contents/Resources/drive_c/Program Files/XM MT4/MQL4';
 
 	grunt.initConfig({
 
 		copy: {
 			main: {
 				files:[
-					{src: 'position-manager.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Experts/position manager/position-manager.mq4'},
-					{src: 'scripts/long.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Scripts/position manager/long.mq4'},
-					{src: 'scripts/short.mq4', dest: '/Users/Mertopawiro/Applications/Wineskin/xm-demo.app/Contents/Resources/drive_c/Program Files/MetaTrader 4/MQL4/Scripts/position manager/short.mq4'}
+					{src: 'position-manager.mq4', dest: dist + '/Experts/position-manager/position-manager.mq4'},
+					{src: 'scripts/long.mq4', dest: dist + '/Scripts/long.mq4'},
+					{src: 'scripts/short.mq4', dest: dist + '/Scripts/short.mq4'}
 				]
 			}
 		},

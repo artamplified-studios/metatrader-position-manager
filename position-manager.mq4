@@ -56,11 +56,48 @@ void positionManager()
 	}
 
 	double partialTarget;
+	double stopTarget;
 
 	for( int i=0; i<OrdersTotal(); i++ ) {
 
 		//	prevent from executing on multiple symbol charts
 		if(	OrderSelect( i, SELECT_BY_POS, MODE_TRADES ) == true && OrderSymbol() == OrderSymbol() ) {
+			int orderID = OrderTicket();
+
+			//	Check stop loss
+			switch( OrderType() ) {
+				//	buy
+				case 0:
+
+					//	Check if stop loss excist
+					if( ObjectFind(0, (string)OrderTicket() + " stops" ) == 0 ) {
+						stopTarget = (double)ObjectGet( (string)OrderTicket() + " stops", 1 );
+						//Print("buy stopTarget: ", stopTarget, " ", MarketInfo( Symbol(), MODE_BID ));
+						if( MarketInfo( Symbol(), MODE_BID ) < stopTarget ) {
+							OrderClose( OrderTicket(), OrderLots(), MarketInfo(Symbol(), MODE_BID), 0, Red );
+							SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " stopped out!" );
+							ObjectDelete( orderID + " stops" );
+						}
+					} 
+
+				break;
+
+				//	sell
+				case 1:
+
+					//	Check if stop loss excist
+					if( ObjectFind(0, (string)OrderTicket() + " stops" ) == 0 ) {
+						stopTarget = (double)ObjectGet( (string)OrderTicket() + " stops", 1 );
+						
+						if( MarketInfo( Symbol(), MODE_BID ) > stopTarget ) {
+							OrderClose( OrderTicket(), OrderLots(), MarketInfo(Symbol(), MODE_ASK), 0, Red );SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " stopped out!" );
+							SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " stopped out!" );
+							ObjectDelete( orderID + " stops" );
+						}
+					} 
+
+				break;
+			}
 			
 			for( int pt=0; pt<amountPartialTarget; pt++ ) {
 
@@ -88,20 +125,23 @@ void positionManager()
 								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " target 0 hit!" );
 
 								historyManager( OrderTicket() );
+								return;
 							}
 
 							if( pt==1 && OrderLots() == (lots/2) ) {
 								//	todo feature request
 								//	maybe trail stop
-								//	OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() + 30*Point, OrderTakeProfit(), 0, Green );
+								OrderModify( OrderTicket(), OrderOpenPrice(), OrderOpenPrice() + 30*Point, OrderTakeProfit(), 0, Green );
 								OrderClose( OrderTicket(), OrderLots()/2, MarketInfo(Symbol(), MODE_BID), 0, DarkGreen );
 								//	Send notification
 								SendNotification( OrderSymbol() + " OrderTicket: " + OrderTicket() + " target 1 hit!" );
 
 								historyManager( OrderTicket() );
+								return;
 							}
-							
+
 						}
+						
 
 					break;
 					//	sell
@@ -180,30 +220,30 @@ void orderManager()
 	if( OrderSelect( OrdersTotal()-1, SELECT_BY_POS, MODE_TRADES) == true && OrderSymbol() ) {
 
 		//	if no stop loss
-		if( OrderStopLoss() == 0 ) {
+		if( OrderTakeProfit() == 0 ) {
 
-			//	set default settings for new order
-			//	check if long/short position
+			// Set default takeProfit
 			switch( OrderType() ) {
 				//	buy
 				case 0:
-				newOrderStopLoss = OrderOpenPrice() - (maxRisk * Point);
-				newOrderTakeProfit = OrderOpenPrice() + ( profit * Point);
-				OrderModify( OrderTicket(), OrderOpenPrice(), newOrderStopLoss, newOrderTakeProfit, 0, Green );
-				break;
-				//	sell
-				case 1:
-				newOrderStopLoss = OrderOpenPrice() + (maxRisk * Point);
-				newOrderTakeProfit = OrderOpenPrice() - ( profit * Point);
-				OrderModify( OrderTicket(), OrderOpenPrice(), newOrderStopLoss, newOrderTakeProfit, 0, Green );
+					newOrderTakeProfit = (OrderOpenPrice() + (profit*Point));
+					OrderModify( OrderTicket(), OrderOpenPrice(), 0, newOrderTakeProfit, 0, Green );
 				break;
 
+				//	sell
+				case 1:
+					Print("newOrderTakeProfit: ", (OrderOpenPrice() - (profit*Point)));
+					newOrderTakeProfit = (OrderOpenPrice() - (profit*Point));
+					OrderModify( OrderTicket(), OrderOpenPrice(), 0, newOrderTakeProfit, 0, Green );
+				break;
 			}
 
 			//	if amountPartialTarget > 0
 			//	set default partial target based on amount
 			if( amountPartialTarget > 0 ) {
-
+				//Print("newOrderTakeProfit: ", newOrderTakeProfit);
+				Print("profit: ", profit);
+				Print("amountPartialTarget: ", amountPartialTarget);
 				//	check if long/short position
 				//	todo:
 				//	maybe merge with above switch statement
@@ -225,6 +265,7 @@ void orderManager()
 					ObjectCreate(0,  (string)OrderTicket() + " target "+(string)pt ,OBJ_HLINE, 0,0, partialTarget );
 					ObjectSetInteger( 0, (string)OrderTicket() + " target "+(string)pt , OBJPROP_COLOR, Orange );
 					ObjectSetInteger( 0, (string)OrderTicket() + " target "+(string)pt , OBJPROP_STYLE, STYLE_DASH );
+					Print("Setting partial new targets: ", pt, " ", partialTarget);
 				}
 				
 			} else {
