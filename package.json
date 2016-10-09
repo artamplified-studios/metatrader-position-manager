@@ -1,0 +1,27 @@
+{
+  "name": "metatrader-position-manager",
+  "version": "1.0.0",
+  "description": "Position manager for Metatrader",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt": "^1.0.1"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artamplified-studios/metatrader-position-manager.git"
+  },
+  "author": "Kiran Mertopawiro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artamplified-studios/metatrader-position-manager/issues"
+  },
+  "homepage": "https://github.com/artamplified-studios/metatrader-position-manager#readme"
+}
